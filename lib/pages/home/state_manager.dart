@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:network_communication/network_communication.dart';
 import 'package:real_time_location/real_time_location.dart';
 import 'package:taluxi_driver/utils/incoming_call_platform_interface.dart';
@@ -13,24 +12,27 @@ class StateManager {
   final String _currentUserId;
   final _voIpProvider = VoIPProvider.instance;
   final RealTimeLocation _realTimeLocation;
-  final BuildContext _context;
+
+  // final BuildContext _context;
   var _callAccepted = false;
-  String _receivedCallId;
-  Timer _antiSpamTimer;
-  var _connectionStateRecentlyChanged = false;
-  var _canChangeConnectionState = true;
+  String? _receivedCallId;
+
+  // Timer _antiSpamTimer;
+  // var _connectionStateRecentlyChanged = false;
+  // var _canChangeConnectionState = true;
   final _stateStreamController = StreamController<State>();
-  String _incomingCallId;
-  IncomingCallPlatformInterface _incomingCallHandler;
+
+  // String _incomingCallId;
+  late IncomingCallPlatformInterface _incomingCallHandler;
 
   Stream<State> get state => _stateStreamController.stream;
 
   StateManager({
-    @required String currentUserId,
-    @required BuildContext context,
-    @required RealTimeLocation realTimeLocation,
+    required String currentUserId,
+    required BuildContext context,
+    required RealTimeLocation realTimeLocation,
   })  : _currentUserId = currentUserId,
-        _context = context,
+        // _context = context,
         _realTimeLocation = realTimeLocation {
     _incomingCallHandler = IncomingCallPlatformInterface(
         onCallAccepted: _acceptCall,
@@ -49,7 +51,9 @@ class StateManager {
       _handleDeviceLocationHandlerExceptions(e);
     } on LocationRepositoryException catch (e) {
       _handleLocationRepositoryExceptions(e, ConnectionFailed(''));
-    } on Exception {
+    } on Exception catch (e, s) {
+      debugPrint('Error Occurred: $e');
+      debugPrintStack(stackTrace: s);
       // TODO rapport
       _stateStreamController.add(
         ConnectionFailed(
@@ -124,9 +128,10 @@ class StateManager {
   }
 
   void _acceptCall() async {
+    if (_receivedCallId == null) return;
     _callAccepted = true;
     await _voIpProvider.acceptCall(
-      callId: _receivedCallId,
+      callId: _receivedCallId!,
       onCallAccepted: _onCallAccepted,
       onCallLeft: _onCallLeft,
       onFail: _onFail,
@@ -136,8 +141,9 @@ class StateManager {
   void _hangUpCall() {
     if (_callAccepted) {
       _voIpProvider.leaveCall();
-    } else
-      _voIpProvider.rejectCall(_receivedCallId);
+    } else {
+      if (_receivedCallId != null) _voIpProvider.rejectCall(_receivedCallId!);
+    }
   }
 
   void _changeSpeakerState(bool enabled) {

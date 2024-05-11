@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:taluxi_common/taluxi_common.dart';
@@ -13,13 +11,13 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  AuthenticationProvider authProvider;
+  late AuthenticationProvider authProvider;
   bool waitDialogIsShown = false;
   bool signInRequested = false;
 
   @override
   Widget build(BuildContext context) {
-    authProvider = Provider.of<AuthenticationProvider>(context, listen: true);
+    authProvider = context.watch<AuthenticationProvider>();
     if (authProvider.authState == AuthState.authenticating && signInRequested) {
       Future.delayed(Duration.zero, () async {
         waitDialogIsShown = true;
@@ -77,7 +75,7 @@ class _WelcomePageState extends State<WelcomePage> {
           content: Text(error.message),
           actions: [
             Center(
-              child: RaisedButton(
+              child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -160,9 +158,7 @@ class _WelcomePageState extends State<WelcomePage> {
 }
 
 class CustomDivider extends StatelessWidget {
-  const CustomDivider({
-    Key key,
-  }) : super(key: key);
+  const CustomDivider({super.key});
 
   final divider = const Expanded(
     child: Padding(

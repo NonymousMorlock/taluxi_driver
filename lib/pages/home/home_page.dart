@@ -12,28 +12,31 @@ final customWhiteColor = Color(0xF5FCFAFA);
 //TODO Refactoring : extracted widgets for better names.
 // ignore: must_be_immutable
 class HomePage extends StatefulWidget {
-  HomePage({Key key}) : super(key: key);
+  HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  AuthenticationProvider _authProvider;
-  User _user;
-  sm.StateManager _stateManager;
+  late AuthenticationProvider _authProvider;
+  User? _user;
+  late sm.StateManager _stateManager;
   var _connected = false;
 
   @override
   void initState() {
     super.initState();
-    _authProvider = Provider.of<AuthenticationProvider>(context, listen: false);
+    _authProvider = context.read<AuthenticationProvider>();
     final realtimerLocation =
         Provider.of<RealTimeLocation>(context, listen: false);
     _user = _authProvider.user;
+    if (_user == null) {
+      Navigator.of(context).pushReplacementNamed('/welcome');
+    }
     _stateManager = sm.StateManager(
       context: context,
-      currentUserId: _user.uid,
+      currentUserId: _user!.uid,
       realTimeLocation: realtimerLocation,
     );
     _stateManager.state.listen(_manageState);
@@ -58,7 +61,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(title),
         content: Text(errorMessage),
         actions: [
-          RaisedButton(
+          ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text("Ok"),
           )
@@ -70,8 +73,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
-    final userHasPhoto = (_authProvider.user.photoUrl != null &&
-        _authProvider.user.photoUrl.isNotEmpty);
+    final userHasPhoto = (_authProvider.user!.photoUrl != null &&
+        _authProvider.user!.photoUrl!.isNotEmpty);
     return Scaffold(
       body: Builder(
         builder: (BuildContext context) => Stack(children: [
@@ -108,7 +111,7 @@ class _HomePageState extends State<HomePage> {
           _menuButton(context)
         ]),
       ),
-      endDrawer: CustomDrower(),
+      endDrawer: CustomDrawer(),
     );
   }
 
@@ -146,7 +149,7 @@ class _HomePageState extends State<HomePage> {
           ],
           image: userHasPhoto
               ? DecorationImage(
-                  image: NetworkImage(_user.photoUrl),
+                  image: NetworkImage(_user!.photoUrl!),
                   fit: BoxFit.cover,
                 )
               : null,
@@ -176,7 +179,7 @@ class _HomePageState extends State<HomePage> {
               Text(
                 "Stats de la journée",
                 textAlign: TextAlign.center,
-                textScaleFactor: 1.1,
+                textScaler: TextScaler.linear(1.1),
               ),
               Divider(color: Colors.white),
               Container(
@@ -188,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Appels réçus"),
-                        Text("9", textScaleFactor: 1.1),
+                        Text("9", textScaler: TextScaler.linear(1.1)),
                       ],
                     ),
                     VerticalDivider(color: Colors.white),
@@ -196,7 +199,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Course éffectuée"),
-                        Text("9", textScaleFactor: 1.1),
+                        Text("9", textScaler: TextScaler.linear(1.1)),
                       ],
                     ),
                     VerticalDivider(color: Colors.white),
@@ -204,7 +207,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Ratio"),
-                        Text("100%", textScaleFactor: 1.1),
+                        Text("100%", textScaler: TextScaler.linear(1.1)),
                       ],
                     )
                   ],
@@ -220,10 +223,10 @@ class _HomePageState extends State<HomePage> {
 
 class BottomRoundedContainer extends StatelessWidget {
   const BottomRoundedContainer({
-    Key key,
-    @required this.deviceSize,
-    @required this.topBorderRadius,
-  }) : super(key: key);
+    super.key,
+    required this.deviceSize,
+    required this.topBorderRadius,
+  });
 
   final Size deviceSize;
   final Radius topBorderRadius;
@@ -239,8 +242,14 @@ class BottomRoundedContainer extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.only(left: deviceSize.width * 0.025),
           child: Text(
-            "Pour trouver un taxi, vous avez juste à cliquez sur le bouton ci-dessous on s'occupera de vous mettre en contact avec le taxi le plus proche de l'endroit où vous vous trouvez actuellement.    Pour trouver un taxi, vous avez juste à cliquez sur le bouton ci-dessous on s'occupera de vous mettre en contact avec le taxi le plus proche de l'endroit où vous vous trouvez actuellement.",
-            textScaleFactor: 1.35,
+            "Pour trouver un taxi, vous avez juste à cliquez sur le bouton "
+            "ci-dessous on s'occupera de vous mettre en contact avec "
+            "le taxi le plus proche de l'endroit où vous vous trouvez "
+            "actuellement.    Pour trouver un taxi, vous avez juste "
+            "à cliquez sur le bouton ci-dessous on s'occupera de "
+            "vous mettre en contact avec le taxi le plus proche de "
+            "l'endroit où vous vous trouvez actuellement.",
+            textScaler: TextScaler.linear(1.35),
             style: TextStyle(
               fontFamily: 'Roboto',
               color: Colors.black54,

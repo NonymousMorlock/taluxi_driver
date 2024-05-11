@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class CustomSwitch extends StatefulWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
-  final Color activeColor;
+  final Color? activeColor;
   final Color inactiveColor;
   final String activeText;
   final String inactiveText;
@@ -13,19 +13,18 @@ class CustomSwitch extends StatefulWidget {
   final double thumbSize;
 
   const CustomSwitch({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    super.key,
+    required this.value,
+    required this.onChanged,
     this.width = 75,
     this.height = 33,
     this.activeColor,
     this.inactiveColor = Colors.grey,
-    @required this.activeText,
-    @required this.inactiveText,
+    required this.activeText,
+    required this.inactiveText,
     // this.activeTextColor = Colors.white70,
     // this.inactiveTextColor = Colors.white70,
-  })  : thumbSize = height - 8,
-        super(key: key);
+  }) : thumbSize = height - 8;
 
   @override
   _CustomSwitchState createState() => _CustomSwitchState();

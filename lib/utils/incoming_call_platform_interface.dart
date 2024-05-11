@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 typedef StateSwitcherCallback = void Function(bool);
@@ -13,20 +12,21 @@ class IncomingCallPlatformInterface {
   StateSwitcherCallback toggleSpeaker;
   StateSwitcherCallback toggleMicrophone;
 
-  IncomingCallPlatformInterface(
-      {@required this.onCallAccepted,
-      @required this.onCallHangedUp,
-      @required this.toggleSpeaker,
-      @required this.toggleMicrophone}) {
+  IncomingCallPlatformInterface({
+    required this.onCallAccepted,
+    required this.onCallHangedUp,
+    required this.toggleSpeaker,
+    required this.toggleMicrophone,
+  }) {
     incomingCallChannel.setMethodCallHandler((call) {
       if (call.method == "callRejected") onCallHangedUp();
-      return;
+      return Future.value();
     });
 
     callEventChannel.setMethodCallHandler(callEventsHandler);
   }
 
-  void callEventsHandler(MethodCall call) {
+  Future<dynamic> callEventsHandler(MethodCall call) async {
     switch (call.method) {
       case "answerCall":
         onCallAccepted();
